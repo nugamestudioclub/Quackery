@@ -5,6 +5,7 @@ public class PlayerController : MonoBehaviour
 {
     private PlayerInput input;
     private CharacterController controller;
+    private PlayerItemController playerItemController;
 
     // Velocity from gravity and other sources, NOT from player controls
     private Vector3 playerVelocity;
@@ -13,20 +14,43 @@ public class PlayerController : MonoBehaviour
     private bool touchingWall = false;
     private Vector3 wallNormal;
 
+    private float bhopActiveCooldown = 0f;
+    private Vector3 bhopStoredVelocity = new Vector3(0, 0, 0);
+
+    // This controls where the visual player is looking. If it is false, the player will just look in the direction they are moving.
+    // If it is true, the player will face the same direction of the camera, and their head will look direction where the camera is pointing.
+    // It should be true if the player is using an item that requires aiming, like the rocket launcher. This gives the appearance that the
+    // character themself is actually aiming.
+    private bool playerVisualsLocked = false;
+    private Vector3 lastLookDirection = new Vector3(1, 0, 0);
+
     [SerializeField] private Transform cameraPivot;
+    [SerializeField] private Transform playerBodyVisuals;
+    [SerializeField] private Transform playerHeadVisuals;
+
+    [SerializeField] private float visualsRotationSpeed = 10f; // How long it takes the player visuals to turn around (does NOT affect transform rotation)
+
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float lookSensitivity = 0.35f;
+
     [SerializeField] private float gravityStrength = 17f;
-    [SerializeField] private float terminalVelocity = 20f;
+    [SerializeField] private float terminalVelocity = 20f;   // The maximum speed the player can be going
     [SerializeField] private float airDrag = 2f;
+
     [SerializeField] private float jumpHeight = 8f;
     [SerializeField] private float wallJumpHeight = 5f;
-    [SerializeField] private float wallJumpSideVelocity = 5f;
+    [SerializeField] private float wallJumpSideVelocity = 5f;  // The amount of sideways velocity you get from walljumps (jump *away* from the wall)
+    [SerializeField] private float wallSlideVelocity = -1.5f;    // How fast you move down while *sliding* on a wall; MUST BE NEGATIVE!!
+
+    [SerializeField] private float bhopVelocityCutoff = 6f; // You must be going at least this speed to bunny hop
+    [SerializeField] private float bhopCooldown = 0.2f;     // Cooldown after hitting the ground when you can still bunny hop
+    [SerializeField] private float bhopAddedVelocity = 10f; // Additional velocity you get from bunny hopping
 
     private void Awake()
     {
         input = new PlayerInput();
         controller = GetComponent<CharacterController>();
+        playerItemController = GetComponent<PlayerItemController>();
     }
 
     private void Start()
@@ -77,6 +101,12 @@ public class PlayerController : MonoBehaviour
         playerVelocity = setVelo;
     }
 
+    // True: player visuals are locked to the camera, meaning the player faces the direction of the camera as if they are looking in that direction
+    // False: player rotates freely, and always faces the direction they are moving/were last moving in
+    public void SetVisualsLocked(bool locked) {
+        playerVisualsLocked = locked;
+    }
+
     private void Update()
     {
         // -- Get inputs --
@@ -91,20 +121,43 @@ public class PlayerController : MonoBehaviour
 
         // Gravity / Jumping
         if (controller.isGrounded) {
+            // Store bunny hop information
+            float horizontalSpeed = Mathf.Sqrt(
+                (playerVelocity.x * playerVelocity.x) + (playerVelocity.z * playerVelocity.z)
+            );
+            if (horizontalSpeed > bhopVelocityCutoff) {
+                bhopActiveCooldown = bhopCooldown;
+                bhopStoredVelocity = new Vector3(playerVelocity.x, 0f, playerVelocity.z);
+            }
+
+            // Set velocity to 0
             if (playerVelocity.y < 0f) {
                 playerVelocity.y = -2f;
                 playerVelocity.x = 0f;
                 playerVelocity.z = 0f;
             }
 
+            // Jump. And if the player can bunny hop, do it
             if (jumpInput) {
                 playerVelocity.y = jumpHeight;
+                if (bhopActiveCooldown > 0f) {
+                    playerVelocity += bhopStoredVelocity + (bhopStoredVelocity.normalized * bhopAddedVelocity);
+                }
             }
         }
         else {
-            if (touchingWall && jumpInput) {
-                playerVelocity = wallNormal * wallJumpSideVelocity;
-                playerVelocity.y = wallJumpHeight;
+            if (touchingWall) {
+                if (playerVelocity.y < wallSlideVelocity) {
+                    playerVelocity.y = wallSlideVelocity;
+                }
+
+                if (jumpInput) {
+                    playerVelocity = wallNormal * wallJumpSideVelocity;
+                    playerVelocity.y = wallJumpHeight;
+                }
+            }
+            else if (jumpInput) {
+                playerItemController.UseJumpItem();
             }
 
             playerVelocity.y -= gravityStrength * Time.deltaTime;
@@ -128,5 +181,39 @@ public class PlayerController : MonoBehaviour
         cameraPitch -= lookInput.y * lookSensitivity;
         cameraPitch = Mathf.Clamp(cameraPitch, -89f, 89f);
         cameraPivot.transform.localRotation = Quaternion.Euler(cameraPitch, 0f, 0f);
+
+        // Player visuals rotation, depending on if the visuals are locked to the camera or not
+        if (playerVisualsLocked) {
+            playerBodyVisuals.rotation = transform.rotation;
+            playerHeadVisuals.rotation = cameraPivot.rotation;
+        }
+        else {
+            Vector3 lookDirection = new Vector3(finalMovement.x, 0f, finalMovement.z);
+            Quaternion targetRotation;
+            if (lookDirection.sqrMagnitude > 0.001f) {
+                lastLookDirection = lookDirection;
+                targetRotation = Quaternion.LookRotation(lookDirection);
+            }
+            else {
+                targetRotation = Quaternion.LookRotation(lastLookDirection);
+            }
+
+            // Slerp smoothly rotates the player
+            playerBodyVisuals.rotation = Quaternion.Slerp(
+                playerBodyVisuals.rotation,
+                targetRotation,
+                visualsRotationSpeed * Time.deltaTime
+            );
+            playerHeadVisuals.rotation = Quaternion.Slerp(
+                playerHeadVisuals.rotation,
+                targetRotation,
+                visualsRotationSpeed * Time.deltaTime
+            );
+        }
+
+        // Reduce bhop timer
+        if (bhopActiveCooldown >= 0f) {
+            bhopActiveCooldown -= Time.deltaTime;
+        }
     }
 }

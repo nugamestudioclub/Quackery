@@ -6,6 +6,8 @@ public class PlayerItemController : MonoBehaviour
     private PlayerController playerController;
 
     private PrimaryItems primaryItem = PrimaryItems.None;
+    private SecondaryItems secondaryItem = SecondaryItems.None;
+    private JumpItems jumpItem = JumpItems.None;
 
     [SerializeField] private Transform cameraPivot;
 
@@ -25,7 +27,27 @@ public class PlayerItemController : MonoBehaviour
         input.Disable();
     }
 
-    void Update()
+    public void UseJumpItem()
+    {
+        switch (jumpItem) {
+            case JumpItems.None:
+                break;
+            case JumpItems.PropellerHat:
+                // TODO: Do something
+                break;
+        }
+        jumpItem = JumpItems.None;
+    }
+
+    public void ObtainPrimaryItem(PrimaryItems item)
+    {
+        if (PrimaryItemUtility.ItemLocksPlayerCamera(item)) {
+            playerController.SetVisualsLocked(true);
+        }
+        primaryItem = item;
+    }
+
+    private void Update()
     {
         bool usePrimaryInput = input.Player.UsePrimary.WasPressedThisFrame();
         bool useSecondaryInput = input.Player.UseSecondary.WasPressedThisFrame();
@@ -35,11 +57,20 @@ public class PlayerItemController : MonoBehaviour
                 case PrimaryItems.None:
                     break;
                 case PrimaryItems.RocketLauncher:
-                    Vector3 launchDirection = -cameraPivot.forward * 16f;
+                    Vector3 launchDirection = -cameraPivot.forward * 19f;
                     playerController.AddVelocity(launchDirection);
                     break;
             }
             primaryItem = PrimaryItems.None;
+            playerController.SetVisualsLocked(false);
+        }
+
+        if (useSecondaryInput) {
+            switch (secondaryItem) {
+                case SecondaryItems.None:
+                    break;
+            }
+            secondaryItem = SecondaryItems.None;
         }
     }
 }
