@@ -5,6 +5,8 @@ public class PlayerItemController : MonoBehaviour
     private PlayerInput input;
     private PlayerController playerController;
 
+    private PrimaryItems primaryItem = PrimaryItems.None;
+
     [SerializeField] private Transform cameraPivot;
 
     private void Awake()
@@ -29,8 +31,15 @@ public class PlayerItemController : MonoBehaviour
         bool useSecondaryInput = input.Player.UseSecondary.WasPressedThisFrame();
 
         if (usePrimaryInput) {
-            Vector3 launchDirection = -cameraPivot.forward * 16f;
-            playerController.AddVelocity(launchDirection);
+            switch (primaryItem) {
+                case PrimaryItems.None:
+                    break;
+                case PrimaryItems.RocketLauncher:
+                    Vector3 launchDirection = -cameraPivot.forward * 16f;
+                    playerController.AddVelocity(launchDirection);
+                    break;
+            }
+            primaryItem = PrimaryItems.None;
         }
     }
 }
