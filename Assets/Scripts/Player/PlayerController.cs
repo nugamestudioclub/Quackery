@@ -34,13 +34,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float lookSensitivity = 0.35f;
 
     [SerializeField] private float gravityStrength = 17f;
-    [SerializeField] private float terminalVelocity = 20f;   // The maximum speed the player can be going
+    [SerializeField] private float terminalVelocity = 30f;   // The maximum speed the player can be going
     [SerializeField] private float airDrag = 2f;
 
     [SerializeField] private float jumpHeight = 8f;
     [SerializeField] private float wallJumpHeight = 5f;
     [SerializeField] private float wallJumpSideVelocity = 5f;  // The amount of sideways velocity you get from walljumps (jump *away* from the wall)
-    [SerializeField] private float wallSlideVelocity = -1.5f;    // How fast you move down while *sliding* on a wall; MUST BE NEGATIVE!!
+    [SerializeField] private float wallSlideVelocity = -1.5f;  // How fast you move down while *sliding* on a wall; MUST BE NEGATIVE!!
 
     [SerializeField] private float bhopVelocityCutoff = 6f; // You must be going at least this speed to bunny hop
     [SerializeField] private float bhopCooldown = 0.2f;     // Cooldown after hitting the ground when you can still bunny hop
@@ -161,9 +161,9 @@ public class PlayerController : MonoBehaviour
             }
 
             playerVelocity.y -= gravityStrength * Time.deltaTime;
-            float dragFactor = Mathf.Exp(-airDrag * Time.deltaTime);
-            playerVelocity.x *= dragFactor;
-            playerVelocity.z *= dragFactor;
+            float dragAmount = airDrag * Time.deltaTime;
+            playerVelocity.x = Mathf.MoveTowards(playerVelocity.x, 0f, dragAmount);
+            playerVelocity.z = Mathf.MoveTowards(playerVelocity.z, 0f, dragAmount);
         }
         playerVelocity = Vector3.ClampMagnitude(playerVelocity, terminalVelocity);
 

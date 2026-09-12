@@ -47,6 +47,22 @@ public class PlayerItemController : MonoBehaviour
         primaryItem = item;
     }
 
+    public void ObtainSecondaryItem(SecondaryItems item)
+    {
+        if (SecondaryItemUtility.ItemLocksPlayerCamera(item)) {
+            playerController.SetVisualsLocked(true);
+        }
+        secondaryItem = item;
+    }
+
+    public void ObtainJumpItem(JumpItems item)
+    {
+        if (JumpItemUtility.ItemLocksPlayerCamera(item)) {
+            playerController.SetVisualsLocked(true);
+        }
+        jumpItem = item;
+    }
+
     private void Update()
     {
         bool usePrimaryInput = input.Player.UsePrimary.WasPressedThisFrame();
