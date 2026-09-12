@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour
     private Vector3 playerVelocity;
 
     private float cameraPitch = 0f;
+    private bool touchingWall = false;
+    private Vector3 wallNormal;
 
     [SerializeField] private Transform cameraPivot;
     [SerializeField] private float moveSpeed = 5f;
@@ -18,6 +20,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float terminalVelocity = 20f;
     [SerializeField] private float airDrag = 2f;
     [SerializeField] private float jumpHeight = 8f;
+    [SerializeField] private float wallJumpHeight = 5f;
+    [SerializeField] private float wallJumpSideVelocity = 5f;
 
     private void Awake()
     {
@@ -40,6 +44,16 @@ public class PlayerController : MonoBehaviour
     {
         input.Disable();
     }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        // Ignore floors and ceilings.
+        if (Mathf.Abs(hit.normal.y) < 0.2f)
+        {
+            wallNormal = hit.normal;
+        }
+    }
+
 
     // Adds to the player's velocity.
     // Velocity is applied *after* movement from player input and is entirely separate.
@@ -69,8 +83,6 @@ public class PlayerController : MonoBehaviour
         Vector2 moveInput = input.Player.Walk.ReadValue<Vector2>();
         Vector2 lookInput = input.Player.Look.ReadValue<Vector2>();
         bool jumpInput = input.Player.Jump.WasPressedThisFrame();
-        bool usePrimaryInput = input.Player.UsePrimary.WasPressedThisFrame();
-        bool useSecondaryInput = input.Player.UseSecondary.WasPressedThisFrame();
 
         // -- Do movement --
         // Player controlled movement
@@ -79,11 +91,10 @@ public class PlayerController : MonoBehaviour
 
         // Gravity / Jumping
         if (controller.isGrounded) {
-            playerVelocity.x = 0f;
-            playerVelocity.z = 0f;
-
             if (playerVelocity.y < 0f) {
                 playerVelocity.y = -2f;
+                playerVelocity.x = 0f;
+                playerVelocity.z = 0f;
             }
 
             if (jumpInput) {
@@ -91,6 +102,11 @@ public class PlayerController : MonoBehaviour
             }
         }
         else {
+            if (touchingWall && jumpInput) {
+                playerVelocity = wallNormal * wallJumpSideVelocity;
+                playerVelocity.y = wallJumpHeight;
+            }
+
             playerVelocity.y -= gravityStrength * Time.deltaTime;
             float dragFactor = Mathf.Exp(-airDrag * Time.deltaTime);
             playerVelocity.x *= dragFactor;
@@ -99,7 +115,9 @@ public class PlayerController : MonoBehaviour
         playerVelocity = Vector3.ClampMagnitude(playerVelocity, terminalVelocity);
 
         Vector3 finalMovement = movement + playerVelocity;
-        controller.Move(finalMovement * Time.deltaTime);
+        CollisionFlags cflags = controller.Move(finalMovement * Time.deltaTime);
+
+        touchingWall = (cflags & CollisionFlags.Sides)!= 0;
 
         // Camera rotation (do NOT use deltaTime!)
         transform.Rotate(
