@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float wallSlideVelocity = -1.5f;  // How fast you move down while *sliding* on a wall; MUST BE NEGATIVE!!
 
     [SerializeField] private float bhopVelocityCutoff = 6f; // You must be going at least this speed to bunny hop
-    [SerializeField] private float bhopCooldown = 0.2f;     // Cooldown after hitting the ground when you can still bunny hop
+    [SerializeField] private float bhopCooldown = 0.25f;    // Cooldown after hitting the ground when you can still bunny hop
     [SerializeField] private float bhopAddedVelocity = 10f; // Additional velocity you get from bunny hopping
 
     private void Awake()
@@ -151,7 +151,7 @@ public class PlayerController : MonoBehaviour
                     playerVelocity += bhopStoredVelocity + (bhopStoredVelocity.normalized * bhopAddedVelocity);
                 }
                 else {
-                    jumpAbortVelocity = (float)(jumpHeight * 0.65);
+                    jumpAbortVelocity = (float)(jumpHeight * 0.85);
                 }
             }
         }
