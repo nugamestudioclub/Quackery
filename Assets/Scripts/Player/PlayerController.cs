@@ -14,6 +14,10 @@ public class PlayerController : MonoBehaviour
     private bool touchingWall = false;
     private Vector3 wallNormal;
 
+    // If you press jump and release quickly, you stop your jump early. It works by setting this variable when you jump, and then subtracting it
+    // from your velocity when you stop holding the jump button. It gets reduced by gravity/deltatime each frame.
+    private float jumpAbortVelocity = 0f;
+
     private float bhopActiveCooldown = 0f;
     private Vector3 bhopStoredVelocity = new Vector3(0, 0, 0);
 
@@ -38,8 +42,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float airDrag = 2f;
 
     [SerializeField] private float jumpHeight = 8f;
-    [SerializeField] private float wallJumpHeight = 5f;
-    [SerializeField] private float wallJumpSideVelocity = 5f;  // The amount of sideways velocity you get from walljumps (jump *away* from the wall)
+    [SerializeField] private float wallJumpHeight = 8f;
+    [SerializeField] private float wallJumpSideVelocity = 8f;  // The amount of sideways velocity you get from walljumps (jump *away* from the wall)
     [SerializeField] private float wallSlideVelocity = -1.5f;  // How fast you move down while *sliding* on a wall; MUST BE NEGATIVE!!
 
     [SerializeField] private float bhopVelocityCutoff = 6f; // You must be going at least this speed to bunny hop
@@ -113,6 +117,7 @@ public class PlayerController : MonoBehaviour
         Vector2 moveInput = input.Player.Walk.ReadValue<Vector2>();
         Vector2 lookInput = input.Player.Look.ReadValue<Vector2>();
         bool jumpInput = input.Player.Jump.WasPressedThisFrame();
+        bool jumpReleasedInput = input.Player.Jump.WasReleasedThisFrame();
 
         // -- Do movement --
         // Player controlled movement
@@ -121,6 +126,8 @@ public class PlayerController : MonoBehaviour
 
         // Gravity / Jumping
         if (controller.isGrounded) {
+            jumpAbortVelocity = 0f;
+
             // Store bunny hop information
             float horizontalSpeed = Mathf.Sqrt(
                 (playerVelocity.x * playerVelocity.x) + (playerVelocity.z * playerVelocity.z)
@@ -143,10 +150,15 @@ public class PlayerController : MonoBehaviour
                 if (bhopActiveCooldown > 0f) {
                     playerVelocity += bhopStoredVelocity + (bhopStoredVelocity.normalized * bhopAddedVelocity);
                 }
+                else {
+                    jumpAbortVelocity = (float)(jumpHeight * 0.65);
+                }
             }
         }
         else {
             if (touchingWall) {
+                jumpAbortVelocity = 0f;
+
                 if (playerVelocity.y < wallSlideVelocity) {
                     playerVelocity.y = wallSlideVelocity;
                 }
@@ -161,11 +173,21 @@ public class PlayerController : MonoBehaviour
             }
 
             playerVelocity.y -= gravityStrength * Time.deltaTime;
+            if (jumpAbortVelocity >= 0f) {
+                jumpAbortVelocity -= gravityStrength * Time.deltaTime;
+            }
+
             float dragAmount = airDrag * Time.deltaTime;
             playerVelocity.x = Mathf.MoveTowards(playerVelocity.x, 0f, dragAmount);
             playerVelocity.z = Mathf.MoveTowards(playerVelocity.z, 0f, dragAmount);
         }
         playerVelocity = Vector3.ClampMagnitude(playerVelocity, terminalVelocity);
+
+        // Abort jump
+        if (jumpReleasedInput && jumpAbortVelocity > 0f) {
+            playerVelocity.y -= jumpAbortVelocity;
+            jumpAbortVelocity = 0f;
+        }
 
         Vector3 finalMovement = movement + playerVelocity;
         CollisionFlags cflags = controller.Move(finalMovement * Time.deltaTime);
