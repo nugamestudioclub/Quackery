@@ -21,6 +21,10 @@ public class PlayerController : MonoBehaviour
     private float bhopActiveCooldown = 0f;
     private Vector3 bhopStoredVelocity = new Vector3(0, 0, 0);
 
+    // Coyote time / jump buffer
+    private float incomingJBufferActiveCooldown = 0f;
+
+
     // This controls where the visual player is looking. If it is false, the player will just look in the direction they are moving.
     // If it is true, the player will face the same direction of the camera, and their head will look direction where the camera is pointing.
     // It should be true if the player is using an item that requires aiming, like the rocket launcher. This gives the appearance that the
@@ -28,6 +32,14 @@ public class PlayerController : MonoBehaviour
     private bool playerVisualsLocked = false;
     private Vector3 lastLookDirection = new Vector3(1, 0, 0);
 
+    private bool wearingPropellerHat = false;
+    private float propellerHatMinVelo = -2f;
+
+    // -- PLAYER CONFIGURATION --
+    // These variables are essentially "magic number" constants which define player physics/input/etc. defaults.
+    // Despite being SerializeFields, they probably should not be adjusted per level; they are set to SerializeField primarily
+    // for convenience. If you change a variable in the Unity editor and want to keep the change, please change it here too, AND remember to
+    // update the prefab
     [SerializeField] private Transform cameraPivot;
     [SerializeField] private Transform playerBodyVisuals;
     [SerializeField] private Transform playerHeadVisuals;
@@ -41,14 +53,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float terminalVelocity = 30f;   // The maximum speed the player can be going
     [SerializeField] private float airDrag = 2f;
 
+    // How long (in seconds) you have BEFORE hitting the ground in which you can press jump and have it register when you hit the ground
+    [SerializeField] private float incomingJumpBufferCooldown = 0.18f;
+
     [SerializeField] private float jumpHeight = 8f;
     [SerializeField] private float wallJumpHeight = 8f;
     [SerializeField] private float wallJumpSideVelocity = 8f;  // The amount of sideways velocity you get from walljumps (jump *away* from the wall)
     [SerializeField] private float wallSlideVelocity = -1.5f;  // How fast you move down while *sliding* on a wall; MUST BE NEGATIVE!!
 
     [SerializeField] private float bhopVelocityCutoff = 6f; // You must be going at least this speed to bunny hop
-    [SerializeField] private float bhopCooldown = 0.25f;    // Cooldown after hitting the ground when you can still bunny hop
+    [SerializeField] private float bhopCooldown = 0.2f;    // Cooldown after hitting the ground when you can still bunny hop
     [SerializeField] private float bhopAddedVelocity = 10f; // Additional velocity you get from bunny hopping
+
+    [SerializeField] private float superjumpVelocityCutoff = 10f; // You must be going at least this speed to super walljump
+    [SerializeField] private float superjumpAddedVelocity = 15f; // Additional vertical velocity you get from a super walljump
 
     private void Awake()
     {
@@ -82,6 +100,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // True: wear the propeller hat (caps minimum y velocity), false: take hat off
+    public void WearPropellerHat(bool wearing) {
+        wearingPropellerHat = wearing;
+    }
 
     // Adds to the player's velocity.
     // Velocity is applied *after* movement from player input and is entirely separate.
@@ -114,17 +136,23 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         // -- Get inputs --
+        // NOTE: These variables exist purely to determine which buttons were pressed
+        // Their values should never be changed later in the script for any reason
         Vector2 moveInput = input.Player.Walk.ReadValue<Vector2>();
         Vector2 lookInput = input.Player.Look.ReadValue<Vector2>();
         bool jumpInput = input.Player.Jump.WasPressedThisFrame();
         bool jumpReleasedInput = input.Player.Jump.WasReleasedThisFrame();
+        // ----
 
         // -- Do movement --
         // Player controlled movement
         Vector3 movement = (transform.right * moveInput.x) + (transform.forward * moveInput.y);
         movement *= moveSpeed;
 
-        // Gravity / Jumping
+        bool incomingJBuffer = incomingJBufferActiveCooldown > 0f;
+
+        // - Gravity / Jumping -
+        // Grounded
         if (controller.isGrounded) {
             jumpAbortVelocity = 0f;
 
@@ -145,7 +173,7 @@ public class PlayerController : MonoBehaviour
             }
 
             // Jump. And if the player can bunny hop, do it
-            if (jumpInput) {
+            if (jumpInput || incomingJBuffer) {
                 playerVelocity.y = jumpHeight;
                 if (bhopActiveCooldown > 0f) {
                     playerVelocity += bhopStoredVelocity + (bhopStoredVelocity.normalized * bhopAddedVelocity);
@@ -155,7 +183,9 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+        // Not grounded
         else {
+            // On wall
             if (touchingWall) {
                 jumpAbortVelocity = 0f;
 
@@ -163,13 +193,25 @@ public class PlayerController : MonoBehaviour
                     playerVelocity.y = wallSlideVelocity;
                 }
 
-                if (jumpInput) {
+                if (jumpInput || incomingJBuffer) {
+                    float originalYVelocity = playerVelocity.y;
                     playerVelocity = wallNormal * wallJumpSideVelocity;
-                    playerVelocity.y = wallJumpHeight;
+
+                    if (originalYVelocity > superjumpVelocityCutoff) {
+                        playerVelocity.y = originalYVelocity + superjumpAddedVelocity;
+                    }
+                    else {
+                        playerVelocity.y = wallJumpHeight;
+                    }
                 }
             }
+            // Not touching wall
             else if (jumpInput) {
                 playerItemController.UseJumpItem();
+
+                // NOTE: since we set jump buffer here, it is possible to use a jump item AND jump on the same input.
+                // This might not be an issue, but it's something to be aware of.
+                incomingJBufferActiveCooldown = incomingJumpBufferCooldown;
             }
 
             playerVelocity.y -= gravityStrength * Time.deltaTime;
@@ -181,6 +223,11 @@ public class PlayerController : MonoBehaviour
             playerVelocity.x = Mathf.MoveTowards(playerVelocity.x, 0f, dragAmount);
             playerVelocity.z = Mathf.MoveTowards(playerVelocity.z, 0f, dragAmount);
         }
+
+        if (wearingPropellerHat && playerVelocity.y < propellerHatMinVelo) {
+            playerVelocity.y = propellerHatMinVelo;
+        }
+
         playerVelocity = Vector3.ClampMagnitude(playerVelocity, terminalVelocity);
 
         // Abort jump
@@ -189,11 +236,13 @@ public class PlayerController : MonoBehaviour
             jumpAbortVelocity = 0f;
         }
 
+        // -- Apply final movement --
         Vector3 finalMovement = movement + playerVelocity;
         CollisionFlags cflags = controller.Move(finalMovement * Time.deltaTime);
 
         touchingWall = (cflags & CollisionFlags.Sides)!= 0;
 
+        // -- Rotations --
         // Camera rotation (do NOT use deltaTime!)
         transform.Rotate(
             0f,
@@ -233,9 +282,13 @@ public class PlayerController : MonoBehaviour
             );
         }
 
-        // Reduce bhop timer
+        // -- Reduce timers --
         if (bhopActiveCooldown >= 0f) {
             bhopActiveCooldown -= Time.deltaTime;
+        }
+
+        if (incomingJBufferActiveCooldown >= 0f) {
+            incomingJBufferActiveCooldown -= Time.deltaTime;
         }
     }
 }

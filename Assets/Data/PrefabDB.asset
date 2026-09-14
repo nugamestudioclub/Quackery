@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 844555ce0191393fbb4325ef65cd71b3, type: 3}
+  m_Name: PrefabDB
+  m_EditorClassIdentifier: Assembly-CSharp::PrefabDatabase
+  rocketLauncher: {fileID: 6488040608775824757, guid: 7dc6b4fa7c8593e10b6d714bd85cf264, type: 3}
+  rocket: {fileID: 5284240027026549412, guid: 5b296009f6dc06e508db8366de8cb3d1, type: 3}
+  smoke: {fileID: 2819321932479755582, guid: f57a98e367089115ca834787a72cf1b9, type: 3}
+  propellerHat: {fileID: 7417679759678210122, guid: 9cd3232726ccf028da4abb17e4502851, type: 3}

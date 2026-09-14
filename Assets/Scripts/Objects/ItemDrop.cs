@@ -31,17 +31,23 @@ public class ItemDrop : MonoBehaviour
         }
 
         if (primaryItem != PrimaryItems.None) {
-            player.ObtainPrimaryItem(primaryItem);
+            if (!player.HasPrimaryItem()) {
+                player.ObtainPrimaryItem(primaryItem);
+            }
         }
         else if (secondaryItem != SecondaryItems.None) {
-            // TODO: Obtain secondary item
+            if (!player.HasSecondaryItem()) {
+                player.ObtainSecondaryItem(secondaryItem);
+            }
         }
         else if (jumpItem != JumpItems.None) {
-            // TODO: Obtain jump item
+            if (!player.HasJumpItem()) {
+                player.ObtainJumpItem(jumpItem);
+            }
         }
 
         if (singleUse) {
-            Destroy(gameObject);
+            Object.Destroy(gameObject);
         }
     }
 }

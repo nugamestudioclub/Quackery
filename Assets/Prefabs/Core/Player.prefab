@@ -631,13 +631,16 @@ MonoBehaviour:
   gravityStrength: 17
   terminalVelocity: 30
   airDrag: 2
+  incomingJumpBufferCooldown: 0.18
   jumpHeight: 8
   wallJumpHeight: 8
   wallJumpSideVelocity: 8
   wallSlideVelocity: -1.5
   bhopVelocityCutoff: 6
-  bhopCooldown: 0.25
+  bhopCooldown: 0.2
   bhopAddedVelocity: 10
+  superjumpVelocityCutoff: 10
+  superjumpAddedVelocity: 15
 --- !u!114 &947212747965265155
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -651,6 +654,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerItemController
   cameraPivot: {fileID: 4236011420476795535}
+  bodyItemVisuals: {fileID: 2631422386535749960}
+  headItemVisuals: {fileID: 852897511397489454}
+  prefabs: {fileID: 11400000, guid: 4c8e21b752a26496d9274a2a62bc2677, type: 2}
 --- !u!1 &2186521166498017025
 GameObject:
   m_ObjectHideFlags: 0
