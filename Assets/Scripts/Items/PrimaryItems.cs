@@ -5,6 +5,7 @@ public enum PrimaryItems
 
     // Items
     RocketLauncher,
+    GrapplingHook,
 }
 
 public static class PrimaryItemUtility
@@ -15,6 +16,8 @@ public static class PrimaryItemUtility
             case PrimaryItems.None:
                 return false;
             case PrimaryItems.RocketLauncher:
+                return true;
+            case PrimaryItems.GrapplingHook:
                 return true;
 
             default:

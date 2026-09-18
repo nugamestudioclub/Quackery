@@ -577,7 +577,7 @@ Transform:
   m_GameObject: {fileID: 1475922116086477060}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: -0}
+  m_LocalPosition: {x: -0, y: 1, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -625,11 +625,14 @@ MonoBehaviour:
   cameraPivot: {fileID: 4236011420476795535}
   playerBodyVisuals: {fileID: 4995013608577939245}
   playerHeadVisuals: {fileID: 1039218397428921903}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
   visualsRotationSpeed: 16
   moveSpeed: 5
   lookSensitivity: 0.35
   gravityStrength: 17
-  terminalVelocity: 30
+  terminalVelocity: 50
   airDrag: 2
   incomingJumpBufferCooldown: 0.18
   jumpHeight: 8

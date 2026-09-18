@@ -10,4 +10,5 @@ public class PrefabDatabase : ScriptableObject
     public GameObject rocket;
     public GameObject smoke;
     public GameObject propellerHat;
+    public GameObject grapplingHook;
 }

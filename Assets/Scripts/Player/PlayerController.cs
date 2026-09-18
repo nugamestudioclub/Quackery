@@ -35,6 +35,12 @@ public class PlayerController : MonoBehaviour
     private bool wearingPropellerHat = false;
     private float propellerHatMinVelo = -2f;
 
+    private Vector3 grappleOriginPlayerOffset = new Vector3(0, 1, 0);
+    private bool usingGrapplingHook = false;
+    private Vector3 grapplePoint;
+    private float grappleDistance;
+    private LineRenderer grappleLine;
+
     // -- PLAYER CONFIGURATION --
     // These variables are essentially "magic number" constants which define player physics/input/etc. defaults.
     // Despite being SerializeFields, they probably should not be adjusted per level; they are set to SerializeField primarily
@@ -43,6 +49,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform cameraPivot;
     [SerializeField] private Transform playerBodyVisuals;
     [SerializeField] private Transform playerHeadVisuals;
+    [SerializeField] private LayerMask groundLayer;
 
     [SerializeField] private float visualsRotationSpeed = 10f; // How long it takes the player visuals to turn around (does NOT affect transform rotation)
 
@@ -50,7 +57,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float lookSensitivity = 0.35f;
 
     [SerializeField] private float gravityStrength = 17f;
-    [SerializeField] private float terminalVelocity = 30f;   // The maximum speed the player can be going
+    [SerializeField] private float terminalVelocity = 50f;   // The maximum speed the player can be going
     [SerializeField] private float airDrag = 2f;
 
     // How long (in seconds) you have BEFORE hitting the ground in which you can press jump and have it register when you hit the ground
@@ -73,12 +80,27 @@ public class PlayerController : MonoBehaviour
         input = new PlayerInput();
         controller = GetComponent<CharacterController>();
         playerItemController = GetComponent<PlayerItemController>();
+        grappleLine = gameObject.AddComponent<LineRenderer>();
+        Material grappleMaterial = new Material(
+            Shader.Find("Universal Render Pipeline/Unlit")
+        );
+        grappleMaterial.color = Color.black;
+        grappleLine.material = grappleMaterial;
     }
 
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+
+        grappleLine.startWidth = 0.05f;
+        grappleLine.endWidth = 0.05f;
+        grappleLine.startColor = Color.black;
+        grappleLine.endColor = Color.black;
+
+        grappleLine.positionCount = 2;
+        grappleLine.enabled = false;
     }
 
     private void OnEnable()
@@ -113,6 +135,11 @@ public class PlayerController : MonoBehaviour
         playerVelocity += velocity;
     }
 
+    public Vector3 GetVelocity()
+    {
+        return playerVelocity;
+    }
+
     // Sets the player's velocity.
     // If you don't want to set a specific direction (leave it as is), use null.
     // Velocity is applied *after* movement from player input and is entirely separate.
@@ -131,6 +158,20 @@ public class PlayerController : MonoBehaviour
     // False: player rotates freely, and always faces the direction they are moving/were last moving in
     public void SetVisualsLocked(bool locked) {
         playerVisualsLocked = locked;
+    }
+
+    public void StartGrappling(float grappleRange) {
+        Vector3 origin = transform.position + grappleOriginPlayerOffset; // Vector3.up has magnitude 1.0f
+        Vector3 direction = cameraPivot.forward;
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, grappleRange, groundLayer)) {
+            grapplePoint = hit.point;
+            grappleDistance = hit.distance;
+            usingGrapplingHook = true;
+        }
+    }
+
+    public void StopGrappling() {
+        usingGrapplingHook = false;
     }
 
     private void Update()
@@ -238,6 +279,30 @@ public class PlayerController : MonoBehaviour
 
         // -- Apply final movement --
         Vector3 finalMovement = movement + playerVelocity;
+        if (usingGrapplingHook) {
+            Vector3 fromGrapple = transform.position - grapplePoint;
+            float distance = fromGrapple.magnitude;
+
+            if (distance > 0.001f)
+            {
+                Vector3 ropeDirection = fromGrapple.normalized;
+
+                float speed = playerVelocity.magnitude;
+
+                // Keep only the tangential component
+                playerVelocity = Vector3.ProjectOnPlane(
+                    playerVelocity,
+                    ropeDirection
+                );
+
+                // Restore speed
+                if (playerVelocity.sqrMagnitude > 0.001f)
+                {
+                    playerVelocity = playerVelocity.normalized * speed;
+                }
+            }
+        }
+
         CollisionFlags cflags = controller.Move(finalMovement * Time.deltaTime);
 
         touchingWall = (cflags & CollisionFlags.Sides)!= 0;
@@ -280,6 +345,16 @@ public class PlayerController : MonoBehaviour
                 targetRotation,
                 visualsRotationSpeed * Time.deltaTime
             );
+        }
+
+        // Draw grapple line
+        if (usingGrapplingHook) {
+            grappleLine.enabled = true;
+            grappleLine.SetPosition(0, transform.position + grappleOriginPlayerOffset);
+            grappleLine.SetPosition(1, grapplePoint);
+        }
+        else {
+            grappleLine.enabled = false;
         }
 
         // -- Reduce timers --

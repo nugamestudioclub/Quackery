@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// TODO: Make it so if the player hits the ground, their active grappling hook goes away, even if they didn't release LMB
+
 public class PlayerItemController : MonoBehaviour
 {
     private PlayerInput input;
@@ -15,8 +17,10 @@ public class PlayerItemController : MonoBehaviour
     private GameObject secondaryItemVisualReference = null;
     private GameObject jumpItemVisualReference = null;
 
-    private bool propellerHatUsed = false;
+    private bool propellerHatInUse = false;
     private float propellerHatDestroyCooldown = 0f;
+
+    private bool grapplingHookInUse = false;
 
     // -- CONFIGURATION --
     [SerializeField] private Transform cameraPivot;
@@ -26,6 +30,8 @@ public class PlayerItemController : MonoBehaviour
     [SerializeField] private PrefabDatabase prefabs;
 
     private float propellerHatJumpBoost = 15f;
+
+    private float grapplingHookRange = 25f;
 
     // -- Unity methods --
     private void Awake()
@@ -60,12 +66,12 @@ public class PlayerItemController : MonoBehaviour
             case JumpItems.None:
                 break;
             case JumpItems.PropellerHat:
-                if (propellerHatUsed) {
+                if (propellerHatInUse) {
                     break;
                 }
                 playerController.WearPropellerHat(false);
                 playerController.SetVelocity(null, propellerHatJumpBoost, null);
-                propellerHatUsed = true;
+                propellerHatInUse = true;
                 propellerHatDestroyCooldown = 1.0f;
                 PropellerHat pHat = jumpItemVisualReference.GetComponent<PropellerHat>();
                 pHat.setSpinSpeed(1600);
@@ -114,6 +120,14 @@ public class PlayerItemController : MonoBehaviour
                     headItemVisuals.TransformPoint(new Vector3(0.4f, -0.1f, 0f)),
                     headItemVisuals.rotation,
                     headItemVisuals
+                );
+                break;
+            case PrimaryItems.GrapplingHook:
+                primaryItemVisualReference = Instantiate(
+                    prefabs.grapplingHook,
+                    bodyItemVisuals.TransformPoint(new Vector3(0.45f, 0.8f, 0f)),
+                    bodyItemVisuals.rotation,
+                    bodyItemVisuals
                 );
                 break;
             default:
@@ -166,6 +180,7 @@ public class PlayerItemController : MonoBehaviour
     private void Update()
     {
         bool usePrimaryInput = input.Player.UsePrimary.WasPressedThisFrame();
+        bool releasePrimaryInput = input.Player.UsePrimary.WasReleasedThisFrame();
         bool useSecondaryInput = input.Player.UseSecondary.WasPressedThisFrame();
 
         if (usePrimaryInput) {
@@ -180,15 +195,44 @@ public class PlayerItemController : MonoBehaviour
                         headItemVisuals.TransformPoint(new Vector3(0.4f, -0.1f, 0f)),
                         headItemVisuals.rotation
                     );
+                    break;
+                case PrimaryItems.GrapplingHook:
+                    if (grapplingHookInUse) {
+                        break;
+                    }
+                    grapplingHookInUse = true;
+                    playerController.StartGrappling(grapplingHookRange);
 
                     break;
             }
-            primaryItem = PrimaryItems.None;
-            playerController.SetVisualsLocked(false);
+            if (primaryItem != PrimaryItems.GrapplingHook) {
+                primaryItem = PrimaryItems.None;
+                playerController.SetVisualsLocked(false);
 
-            if (primaryItemVisualReference != null) {
-                Object.Destroy(primaryItemVisualReference);
-                primaryItemVisualReference = null;
+                if (primaryItemVisualReference != null) {
+                    Object.Destroy(primaryItemVisualReference);
+                    primaryItemVisualReference = null;
+                }
+            }
+        }
+
+        if (releasePrimaryInput) {
+            switch (primaryItem) {
+                default:
+                    break;
+
+                case PrimaryItems.GrapplingHook:
+                    if (grapplingHookInUse) {
+                        grapplingHookInUse = false;
+                        primaryItem = PrimaryItems.None;
+                        playerController.SetVisualsLocked(false);
+                        playerController.StopGrappling();
+                        if (primaryItemVisualReference != null) {
+                            Object.Destroy(primaryItemVisualReference);
+                            primaryItemVisualReference = null;
+                        }
+                    }
+                    break;
             }
         }
 
@@ -208,8 +252,8 @@ public class PlayerItemController : MonoBehaviour
         if (propellerHatDestroyCooldown > 0f) {
             propellerHatDestroyCooldown -= Time.deltaTime;
         }
-        else if (propellerHatUsed && jumpItem == JumpItems.PropellerHat) {
-            propellerHatUsed = false;
+        else if (propellerHatInUse && jumpItem == JumpItems.PropellerHat) {
+            propellerHatInUse = false;
             jumpItem = JumpItems.None;
 
             if (jumpItemVisualReference != null) {

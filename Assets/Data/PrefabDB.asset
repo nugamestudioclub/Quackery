@@ -16,3 +16,4 @@ MonoBehaviour:
   rocket: {fileID: 5284240027026549412, guid: 5b296009f6dc06e508db8366de8cb3d1, type: 3}
   smoke: {fileID: 2819321932479755582, guid: f57a98e367089115ca834787a72cf1b9, type: 3}
   propellerHat: {fileID: 7417679759678210122, guid: 9cd3232726ccf028da4abb17e4502851, type: 3}
+  grapplingHook: {fileID: 8442677418448837093, guid: 740ac65b50a5b02a1a539a1ee664708e, type: 3}
