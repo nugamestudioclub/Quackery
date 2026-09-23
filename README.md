@@ -11,8 +11,8 @@
 - Pick "Unity 6.3 LTS" and wait for it to install
 
 ### Clone git repository
-- Use the command line: "git clone git@github.com:Max-Selby/ParkourGame.git"
-- Or use GitHub desktop (Open https://github.com/Max-Selby/ParkourGame, click "Code", then "Open with GitHub Desktop")
+- Use the command line: "git clone git@github.com:nugamestudioclub/Quackery.git" or "git clone https://github.com/nugamestudioclub/Quackery.git"
+- Or use GitHub desktop (Open https://github.com/nugamestudioclub/Quackery, click "Code", then "Open with GitHub Desktop")
 - If you need help with this let me know
 
 ### Open project
