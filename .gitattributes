@@ -1,5 +1,5 @@
 # For line ending normalization between Unix and Windows
-* text=auto
+* text=auto eol=lf
 
 Unity
 *.cs diff=csharp text
