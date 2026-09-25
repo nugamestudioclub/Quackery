@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2447340047606460923
+--- !u!1 &2384026040547771146
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,9 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7501210184587251332}
-  - component: {fileID: 7001164699141600132}
-  - component: {fileID: 2296031908161466378}
+  - component: {fileID: 3052899180026649008}
+  - component: {fileID: 2157725823738500629}
+  - component: {fileID: 4185321237843419871}
   m_Layer: 0
   m_Name: Rocket
   m_TagString: Untagged
@@ -18,36 +18,36 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7501210184587251332
+--- !u!4 &3052899180026649008
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2447340047606460923}
+  m_GameObject: {fileID: 2384026040547771146}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.000000021855692, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.2}
-  m_LocalScale: {x: 0.15, y: 0.15, z: -0.15}
+  m_LocalRotation: {x: 0.000000021855694, y: 0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 0.183}
+  m_LocalScale: {x: 14.6, y: 14.6, z: -15}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2611635150845496694}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &7001164699141600132
+--- !u!33 &2157725823738500629
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2447340047606460923}
-  m_Mesh: {fileID: 1988216149656743765, guid: 0561b598fe6c206fab454c9667e9a626, type: 3}
---- !u!23 &2296031908161466378
+  m_GameObject: {fileID: 2384026040547771146}
+  m_Mesh: {fileID: 1988216149656743765, guid: 9b0affdd4ed338e44a0bd193759752b1, type: 3}
+--- !u!23 &4185321237843419871
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2447340047606460923}
+  m_GameObject: {fileID: 2384026040547771146}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -121,7 +121,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7501210184587251332}
+  - {fileID: 3052899180026649008}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &5441662330519518352
