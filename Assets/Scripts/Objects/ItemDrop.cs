@@ -5,19 +5,14 @@ public class ItemDrop : MonoBehaviour
 {
     // By default, all fields are "None". These can be set in the editor to pick an item to give on collision with the player
     [SerializeField] private PrimaryItems primaryItem = PrimaryItems.None;
-    [SerializeField] private SecondaryItems secondaryItem = SecondaryItems.None;
     [SerializeField] private JumpItems jumpItem = JumpItems.None;
     [SerializeField] private bool singleUse = false; // Item drop disappears after pickup
 
     private void Awake()
     {
         // To fix mistakes, use the first set item. Ideally only one item is set in the scene, though.
-        if (jumpItem != JumpItems.None && (secondaryItem != SecondaryItems.None || primaryItem != PrimaryItems.None)) {
+        if (jumpItem != JumpItems.None && primaryItem != PrimaryItems.None) {
             jumpItem = JumpItems.None;
-        }
-
-        if (secondaryItem != SecondaryItems.None && primaryItem != PrimaryItems.None) {
-            secondaryItem = SecondaryItems.None;
         }
     }
 
@@ -31,13 +26,8 @@ public class ItemDrop : MonoBehaviour
         }
 
         if (primaryItem != PrimaryItems.None) {
-            if (!player.HasPrimaryItem()) {
+            if (!player.HasPrimaryItem(primaryItem) && !player.PrimaryItemsFull()) {
                 player.ObtainPrimaryItem(primaryItem);
-            }
-        }
-        else if (secondaryItem != SecondaryItems.None) {
-            if (!player.HasSecondaryItem()) {
-                player.ObtainSecondaryItem(secondaryItem);
             }
         }
         else if (jumpItem != JumpItems.None) {

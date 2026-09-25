@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // TODO: Make it so if the player hits the ground, their active grappling hook goes away, even if they didn't release LMB
 
@@ -7,14 +8,13 @@ public class PlayerItemController : MonoBehaviour
     private PlayerInput input;
     private PlayerController playerController;
 
-    private PrimaryItems primaryItem = PrimaryItems.None;
-    private SecondaryItems secondaryItem = SecondaryItems.None;
+    private PrimaryItems[] primaryItem = {PrimaryItems.None, PrimaryItems.None, PrimaryItems.None};
+    private int selectedPrimaryItem = 1;
     private JumpItems jumpItem = JumpItems.None;
 
     // Item references to created visual instances
     // These exist so that they can be deleted later
-    private GameObject primaryItemVisualReference = null;
-    private GameObject secondaryItemVisualReference = null;
+    private GameObject[] primaryItemVisualReference = {null, null, null};
     private GameObject jumpItemVisualReference = null;
 
     private bool propellerHatInUse = false;
@@ -60,6 +60,16 @@ public class PlayerItemController : MonoBehaviour
     }
 
     // -- Public api --
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void KillPlayer()
+    {
+        RestartLevel();
+    }
+
     public void UseJumpItem()
     {
         switch (jumpItem) {
@@ -88,12 +98,12 @@ public class PlayerItemController : MonoBehaviour
         }
     }
 
-    public bool HasPrimaryItem() {
-        return primaryItem != PrimaryItems.None;
+    public bool HasPrimaryItem(PrimaryItems item) {
+        return item == primaryItem[0] || item == primaryItem[1] || item == primaryItem[2];
     }
 
-    public bool HasSecondaryItem() {
-        return secondaryItem != SecondaryItems.None;
+    public bool PrimaryItemsFull() {
+        return primaryItem[0] != PrimaryItems.None && primaryItem[1] != PrimaryItems.None && primaryItem[2] != PrimaryItems.None;
     }
 
     public bool HasJumpItem() {
@@ -102,20 +112,31 @@ public class PlayerItemController : MonoBehaviour
 
     public void ObtainPrimaryItem(PrimaryItems item)
     {
-        if (primaryItemVisualReference != null) {
-            Object.Destroy(primaryItemVisualReference.gameObject);
-            primaryItemVisualReference = null;
+        int slot = 0;
+        if (primaryItem[0] != PrimaryItems.None) {
+            slot = 1;
+        }
+        else if (primaryItem[1] != PrimaryItems.None) {
+            slot = 2;
+        }
+        else if (primaryItem[2] != PrimaryItems.None) {
+            return;
         }
 
-        if (PrimaryItemUtility.ItemLocksPlayerCamera(item)) {
+        if (primaryItemVisualReference[slot] != null) {
+            Object.Destroy(primaryItemVisualReference[slot].gameObject);
+            primaryItemVisualReference[slot] = null;
+        }
+
+        if (PrimaryItemUtility.ItemLocksPlayerCamera(item) && selectedPrimaryItem == slot - 1) {
             playerController.SetVisualsLocked(true);
         }
-        primaryItem = item;
+        primaryItem[slot] = item;
 
         // Update visuals
-        switch (primaryItem) {
+        switch (primaryItem[slot]) {
             case PrimaryItems.RocketLauncher:
-                primaryItemVisualReference = Instantiate(
+                primaryItemVisualReference[slot] = Instantiate(
                     prefabs.rocketLauncher,
                     headItemVisuals.TransformPoint(new Vector3(0.4f, -0.1f, 0f)),
                     headItemVisuals.rotation,
@@ -123,7 +144,7 @@ public class PlayerItemController : MonoBehaviour
                 );
                 break;
             case PrimaryItems.GrapplingHook:
-                primaryItemVisualReference = Instantiate(
+                primaryItemVisualReference[slot] = Instantiate(
                     prefabs.grapplingHook,
                     bodyItemVisuals.TransformPoint(new Vector3(0.45f, 0.8f, 0f)),
                     bodyItemVisuals.rotation,
@@ -133,19 +154,10 @@ public class PlayerItemController : MonoBehaviour
             default:
                 break;
         }
-    }
 
-    public void ObtainSecondaryItem(SecondaryItems item)
-    {
-        if (secondaryItemVisualReference != null) {
-            Object.Destroy(secondaryItemVisualReference);
-            secondaryItemVisualReference = null;
+        if (primaryItemVisualReference[slot] != null && selectedPrimaryItem - 1 != slot) {
+            primaryItemVisualReference[slot].SetActive(false);
         }
-
-        if (SecondaryItemUtility.ItemLocksPlayerCamera(item)) {
-            playerController.SetVisualsLocked(true);
-        }
-        secondaryItem = item;
     }
 
     public void ObtainJumpItem(JumpItems item)
@@ -181,10 +193,60 @@ public class PlayerItemController : MonoBehaviour
     {
         bool usePrimaryInput = input.Player.UsePrimary.WasPressedThisFrame();
         bool releasePrimaryInput = input.Player.UsePrimary.WasReleasedThisFrame();
-        bool useSecondaryInput = input.Player.UseSecondary.WasPressedThisFrame();
+        bool hotbar1Input = input.Player.Hotbar1.WasPressedThisFrame();
+        bool hotbar2Input = input.Player.Hotbar2.WasPressedThisFrame();
+        bool hotbar3Input = input.Player.Hotbar3.WasPressedThisFrame();
+        bool restartLevelInput = input.Player.Restart.WasPressedThisFrame();
+
+        if (restartLevelInput) {
+            RestartLevel();
+            return;
+        }
+
+        if (hotbar1Input) {
+            selectedPrimaryItem = 1;
+            if (primaryItemVisualReference[0] != null) {
+                primaryItemVisualReference[0].SetActive(true);
+            }
+            if (primaryItemVisualReference[1] != null) {
+                primaryItemVisualReference[1].SetActive(false);
+            }
+            if (primaryItemVisualReference[2] != null) {
+                primaryItemVisualReference[2].SetActive(false);
+            }
+        } else if (hotbar2Input) {
+            selectedPrimaryItem = 2;
+            if (primaryItemVisualReference[0] != null) {
+                primaryItemVisualReference[0].SetActive(false);
+            }
+            if (primaryItemVisualReference[1] != null) {
+                primaryItemVisualReference[1].SetActive(true);
+            }
+            if (primaryItemVisualReference[2] != null) {
+                primaryItemVisualReference[2].SetActive(false);
+            }
+        } else if (hotbar3Input) {
+            selectedPrimaryItem = 3;
+            if (primaryItemVisualReference[0] != null) {
+                primaryItemVisualReference[0].SetActive(false);
+            }
+            if (primaryItemVisualReference[1] != null) {
+                primaryItemVisualReference[1].SetActive(false);
+            }
+            if (primaryItemVisualReference[2] != null) {
+                primaryItemVisualReference[2].SetActive(true);
+            }
+        }
+        if (PrimaryItemUtility.ItemLocksPlayerCamera(primaryItem[selectedPrimaryItem - 1])) {
+            playerController.SetVisualsLocked(true);
+        } else {
+            playerController.SetVisualsLocked(false);
+        }
+
+        int slot = selectedPrimaryItem - 1;
 
         if (usePrimaryInput) {
-            switch (primaryItem) {
+            switch (primaryItem[slot]) {
                 case PrimaryItems.None:
                     break;
                 case PrimaryItems.RocketLauncher:
@@ -205,47 +267,34 @@ public class PlayerItemController : MonoBehaviour
 
                     break;
             }
-            if (primaryItem != PrimaryItems.GrapplingHook) {
-                primaryItem = PrimaryItems.None;
+            if (primaryItem[slot] != PrimaryItems.GrapplingHook) {
+                primaryItem[slot] = PrimaryItems.None;
                 playerController.SetVisualsLocked(false);
 
-                if (primaryItemVisualReference != null) {
-                    Object.Destroy(primaryItemVisualReference);
-                    primaryItemVisualReference = null;
+                if (primaryItemVisualReference[slot] != null) {
+                    Object.Destroy(primaryItemVisualReference[slot]);
+                    primaryItemVisualReference[slot] = null;
                 }
             }
         }
 
         if (releasePrimaryInput) {
-            switch (primaryItem) {
+            switch (primaryItem[slot]) {
                 default:
                     break;
 
                 case PrimaryItems.GrapplingHook:
                     if (grapplingHookInUse) {
                         grapplingHookInUse = false;
-                        primaryItem = PrimaryItems.None;
+                        primaryItem[slot] = PrimaryItems.None;
                         playerController.SetVisualsLocked(false);
                         playerController.StopGrappling();
-                        if (primaryItemVisualReference != null) {
-                            Object.Destroy(primaryItemVisualReference);
-                            primaryItemVisualReference = null;
+                        if (primaryItemVisualReference[slot] != null) {
+                            Object.Destroy(primaryItemVisualReference[slot]);
+                            primaryItemVisualReference[slot] = null;
                         }
                     }
                     break;
-            }
-        }
-
-        if (useSecondaryInput) {
-            switch (secondaryItem) {
-                case SecondaryItems.None:
-                    break;
-            }
-            secondaryItem = SecondaryItems.None;
-
-            if (secondaryItemVisualReference != null) {
-                Object.Destroy(secondaryItemVisualReference.gameObject);
-                secondaryItemVisualReference = null;
             }
         }
 
