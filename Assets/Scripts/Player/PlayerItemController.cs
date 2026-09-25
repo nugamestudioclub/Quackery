@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // TODO: Make it so if the player hits the ground, their active grappling hook goes away, even if they didn't release LMB
 
@@ -59,6 +60,16 @@ public class PlayerItemController : MonoBehaviour
     }
 
     // -- Public api --
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void KillPlayer()
+    {
+        RestartLevel();
+    }
+
     public void UseJumpItem()
     {
         switch (jumpItem) {
@@ -185,6 +196,12 @@ public class PlayerItemController : MonoBehaviour
         bool hotbar1Input = input.Player.Hotbar1.WasPressedThisFrame();
         bool hotbar2Input = input.Player.Hotbar2.WasPressedThisFrame();
         bool hotbar3Input = input.Player.Hotbar3.WasPressedThisFrame();
+        bool restartLevelInput = input.Player.Restart.WasPressedThisFrame();
+
+        if (restartLevelInput) {
+            RestartLevel();
+            return;
+        }
 
         if (hotbar1Input) {
             selectedPrimaryItem = 1;
