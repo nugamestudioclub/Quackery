@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 245aabda3e05296058a04608717d6034, type: 3}
+  m_Name: MugshotDB
+  m_EditorClassIdentifier: Assembly-CSharp::ItemMugshotDatabase
+  rocketLauncher: {fileID: 2776169872731505672, guid: 80a28607398a6073baf925e998d81fbf, type: 3}
+  grapplingHook: {fileID: 67798685135089430, guid: 13f1feef10382f8398e7f9fcdcdc61c6, type: 3}
+  propellerHat: {fileID: -4816895413287086045, guid: 9e1468ae33d30c6449c6b927fefb938a, type: 3}
