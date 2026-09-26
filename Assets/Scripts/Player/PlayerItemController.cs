@@ -70,6 +70,21 @@ public class PlayerItemController : MonoBehaviour
         RestartLevel();
     }
 
+    public int GetActiveHotbarSlot()
+    {
+        return selectedPrimaryItem;
+    }
+
+    public PrimaryItems[] GetPrimaryItems()
+    {
+        return primaryItem;
+    }
+
+    public JumpItems GetJumpItem()
+    {
+        return jumpItem;
+    }
+
     public void UseJumpItem()
     {
         switch (jumpItem) {

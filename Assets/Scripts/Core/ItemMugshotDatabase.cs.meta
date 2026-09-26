@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 245aabda3e05296058a04608717d6034
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - rocketLauncher: {fileID: 2776169872731505672, guid: 80a28607398a6073baf925e998d81fbf, type: 3}
+  - grapplingHook: {fileID: 67798685135089430, guid: 13f1feef10382f8398e7f9fcdcdc61c6, type: 3}
+  - propellerHat: {fileID: -4816895413287086045, guid: 9e1468ae33d30c6449c6b927fefb938a, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
