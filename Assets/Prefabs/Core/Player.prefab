@@ -452,7 +452,7 @@ MonoBehaviour:
   moveSpeed: 5
   lookSensitivity: 0.35
   gravityStrength: 17
-  terminalVelocity: 50
+  terminalVelocity: 200
   airDrag: 2
   incomingJumpBufferCooldown: 0.18
   jumpHeight: 8

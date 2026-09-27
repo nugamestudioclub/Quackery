@@ -127,14 +127,17 @@ public class PlayerItemController : MonoBehaviour
 
     public void ObtainPrimaryItem(PrimaryItems item)
     {
-        int slot = 0;
-        if (primaryItem[0] != PrimaryItems.None) {
+        int slot;
+        if (primaryItem[0] == PrimaryItems.None) {
+            slot = 0;
+        }
+        else if (primaryItem[1] == PrimaryItems.None) {
             slot = 1;
         }
-        else if (primaryItem[1] != PrimaryItems.None) {
+        else if (primaryItem[2] == PrimaryItems.None) {
             slot = 2;
         }
-        else if (primaryItem[2] != PrimaryItems.None) {
+        else {
             return;
         }
 

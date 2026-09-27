@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float lookSensitivity = 0.35f;
 
     [SerializeField] private float gravityStrength = 17f;
-    [SerializeField] private float terminalVelocity = 50f;   // The maximum speed the player can be going
+    [SerializeField] private float terminalVelocity = 200f;   // The maximum speed the player can be going
     [SerializeField] private float airDrag = 2f;
 
     // How long (in seconds) you have BEFORE hitting the ground in which you can press jump and have it register when you hit the ground
@@ -176,6 +176,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        Debug.Log(playerVelocity.magnitude);
+
         // -- Get inputs --
         // NOTE: These variables exist purely to determine which buttons were pressed
         // Their values should never be changed later in the script for any reason
