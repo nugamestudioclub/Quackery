@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 // TODO: Make it so if the player hits the ground, their active grappling hook goes away, even if they didn't release LMB
 
@@ -63,6 +64,17 @@ public class PlayerItemController : MonoBehaviour
     public void RestartLevel()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void LastCheckpoint()
+    {
+        // Sets the player's position to the furthest checkpoint the player has reached
+        playerController.gameObject.transform.position = FindObjectsByType<SaveCheckpoint>(FindObjectsSortMode.None).First(c => c.checkpointIndex == playerController.currentCheckpoint).gameObject.transform.position;
+        // TODO: For some reason, this correctly updates the player's position, but the player never actually moves to the checkpoint
+        // Resets player velocity
+        playerController.SetVelocity(0, 0, 0);
+
+        // TODO: Respawn all the single-use items that have been used
     }
 
     public void KillPlayer()
@@ -197,10 +209,21 @@ public class PlayerItemController : MonoBehaviour
         bool hotbar2Input = input.Player.Hotbar2.WasPressedThisFrame();
         bool hotbar3Input = input.Player.Hotbar3.WasPressedThisFrame();
         bool restartLevelInput = input.Player.Restart.WasPressedThisFrame();
+        bool lastCheckpointInput = input.Player.Checkpoint.WasPressedThisFrame();
 
         if (restartLevelInput) {
             RestartLevel();
             return;
+        }
+
+        if (lastCheckpointInput)
+        {
+            // If no checkpoints have been gotten, just reloads the level
+            if (playerController.currentCheckpoint == 0)
+            {
+                RestartLevel();
+            }
+            LastCheckpoint();
         }
 
         if (hotbar1Input) {

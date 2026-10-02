@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    // Stores current checkpoint, starting with 0 (no checkpoints collected)
+    public int currentCheckpoint = 0;
     private PlayerInput input;
     private CharacterController controller;
     private PlayerItemController playerItemController;

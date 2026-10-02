@@ -40,4 +40,7 @@ public class ItemDrop : MonoBehaviour
             Object.Destroy(gameObject);
         }
     }
+
+    // Used in checkpoint scripts to find items that are single use
+    public bool IsSingleUse() { return singleUse; }
 }

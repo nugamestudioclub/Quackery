@@ -181,6 +181,16 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""Checkpoint"",
+                    ""type"": ""Button"",
+                    ""id"": ""5874f07a-d098-41e0-a5bb-7678fab1b13c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -363,11 +373,22 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""c7c8e682-11a5-4aaf-a074-73247a144c53"",
-                    ""path"": ""<Keyboard>/r"",
+                    ""path"": ""<Keyboard>/x"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Restart"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7b6e8fb3-455c-4e81-8019-17b6953cf66f"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Checkpoint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -387,6 +408,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_Player_Hotbar2 = m_Player.FindAction("Hotbar2", throwIfNotFound: true);
         m_Player_Hotbar3 = m_Player.FindAction("Hotbar3", throwIfNotFound: true);
         m_Player_Restart = m_Player.FindAction("Restart", throwIfNotFound: true);
+        m_Player_Checkpoint = m_Player.FindAction("Checkpoint", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
@@ -476,6 +498,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Hotbar2;
     private readonly InputAction m_Player_Hotbar3;
     private readonly InputAction m_Player_Restart;
+    private readonly InputAction m_Player_Checkpoint;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -523,6 +546,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Restart".
         /// </summary>
         public InputAction @Restart => m_Wrapper.m_Player_Restart;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Checkpoint".
+        /// </summary>
+        public InputAction @Checkpoint => m_Wrapper.m_Player_Checkpoint;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -576,6 +603,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Restart.started += instance.OnRestart;
             @Restart.performed += instance.OnRestart;
             @Restart.canceled += instance.OnRestart;
+            @Checkpoint.started += instance.OnCheckpoint;
+            @Checkpoint.performed += instance.OnCheckpoint;
+            @Checkpoint.canceled += instance.OnCheckpoint;
         }
 
         /// <summary>
@@ -614,6 +644,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Restart.started -= instance.OnRestart;
             @Restart.performed -= instance.OnRestart;
             @Restart.canceled -= instance.OnRestart;
+            @Checkpoint.started -= instance.OnCheckpoint;
+            @Checkpoint.performed -= instance.OnCheckpoint;
+            @Checkpoint.canceled -= instance.OnCheckpoint;
         }
 
         /// <summary>
@@ -717,5 +750,12 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRestart(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Checkpoint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCheckpoint(InputAction.CallbackContext context);
     }
 }

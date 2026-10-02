@@ -95,6 +95,16 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "Checkpoint",
+                    "type": "Button",
+                    "id": "5874f07a-d098-41e0-a5bb-7678fab1b13c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -277,11 +287,22 @@
                 {
                     "name": "",
                     "id": "c7c8e682-11a5-4aaf-a074-73247a144c53",
-                    "path": "<Keyboard>/r",
+                    "path": "<Keyboard>/x",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Restart",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7b6e8fb3-455c-4e81-8019-17b6953cf66f",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Checkpoint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
