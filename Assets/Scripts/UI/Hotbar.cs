@@ -68,6 +68,9 @@ public class Hotbar : MonoBehaviour
                     case PrimaryItems.GrapplingHook:
                         setSprite = mugshotsDB.grapplingHook;
                         break;
+                    case PrimaryItems.RedirectionOrb:
+                        setSprite = mugshotsDB.redirectionOrb;
+                        break;
                     default:
                         break;
                 }

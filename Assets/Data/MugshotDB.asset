@@ -15,3 +15,4 @@ MonoBehaviour:
   rocketLauncher: {fileID: 2776169872731505672, guid: 80a28607398a6073baf925e998d81fbf, type: 3}
   grapplingHook: {fileID: 67798685135089430, guid: 13f1feef10382f8398e7f9fcdcdc61c6, type: 3}
   propellerHat: {fileID: -4816895413287086045, guid: 9e1468ae33d30c6449c6b927fefb938a, type: 3}
+  redirectionOrb: {fileID: 7396100601881336285, guid: d0a60ee71006584e1b2d6177b32d1041, type: 3}

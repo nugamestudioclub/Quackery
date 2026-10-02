@@ -181,6 +181,26 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""SenseUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""22e19c15-24f6-47c5-8cae-36a0a08e7365"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""SenseDown"",
+                    ""type"": ""Button"",
+                    ""id"": ""44248979-e130-463c-ae7f-d6e5cef0fda6"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -370,6 +390,28 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""action"": ""Restart"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""04586463-fb70-486c-8277-d30b4960f3e2"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SenseUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f8012e43-a35e-4c32-8052-ef330ad06aad"",
+                    ""path"": ""<Keyboard>/o"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SenseDown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -387,6 +429,8 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_Player_Hotbar2 = m_Player.FindAction("Hotbar2", throwIfNotFound: true);
         m_Player_Hotbar3 = m_Player.FindAction("Hotbar3", throwIfNotFound: true);
         m_Player_Restart = m_Player.FindAction("Restart", throwIfNotFound: true);
+        m_Player_SenseUp = m_Player.FindAction("SenseUp", throwIfNotFound: true);
+        m_Player_SenseDown = m_Player.FindAction("SenseDown", throwIfNotFound: true);
     }
 
     ~@PlayerInput()
@@ -476,6 +520,8 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Hotbar2;
     private readonly InputAction m_Player_Hotbar3;
     private readonly InputAction m_Player_Restart;
+    private readonly InputAction m_Player_SenseUp;
+    private readonly InputAction m_Player_SenseDown;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -523,6 +569,14 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Restart".
         /// </summary>
         public InputAction @Restart => m_Wrapper.m_Player_Restart;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/SenseUp".
+        /// </summary>
+        public InputAction @SenseUp => m_Wrapper.m_Player_SenseUp;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/SenseDown".
+        /// </summary>
+        public InputAction @SenseDown => m_Wrapper.m_Player_SenseDown;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -576,6 +630,12 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Restart.started += instance.OnRestart;
             @Restart.performed += instance.OnRestart;
             @Restart.canceled += instance.OnRestart;
+            @SenseUp.started += instance.OnSenseUp;
+            @SenseUp.performed += instance.OnSenseUp;
+            @SenseUp.canceled += instance.OnSenseUp;
+            @SenseDown.started += instance.OnSenseDown;
+            @SenseDown.performed += instance.OnSenseDown;
+            @SenseDown.canceled += instance.OnSenseDown;
         }
 
         /// <summary>
@@ -614,6 +674,12 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Restart.started -= instance.OnRestart;
             @Restart.performed -= instance.OnRestart;
             @Restart.canceled -= instance.OnRestart;
+            @SenseUp.started -= instance.OnSenseUp;
+            @SenseUp.performed -= instance.OnSenseUp;
+            @SenseUp.canceled -= instance.OnSenseUp;
+            @SenseDown.started -= instance.OnSenseDown;
+            @SenseDown.performed -= instance.OnSenseDown;
+            @SenseDown.canceled -= instance.OnSenseDown;
         }
 
         /// <summary>
@@ -717,5 +783,19 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRestart(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SenseUp" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSenseUp(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SenseDown" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSenseDown(InputAction.CallbackContext context);
     }
 }

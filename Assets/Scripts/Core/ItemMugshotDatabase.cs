@@ -9,4 +9,5 @@ public class ItemMugshotDatabase : ScriptableObject
     public Sprite rocketLauncher;
     public Sprite grapplingHook;
     public Sprite propellerHat;
+    public Sprite redirectionOrb;
 }

@@ -6,6 +6,7 @@ public enum PrimaryItems
     // Items
     RocketLauncher,
     GrapplingHook,
+    RedirectionOrb,
 }
 
 public static class PrimaryItemUtility
@@ -18,6 +19,8 @@ public static class PrimaryItemUtility
             case PrimaryItems.RocketLauncher:
                 return true;
             case PrimaryItems.GrapplingHook:
+                return true;
+            case PrimaryItems.RedirectionOrb:
                 return true;
 
             default:

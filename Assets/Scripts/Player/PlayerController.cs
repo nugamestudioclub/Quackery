@@ -24,6 +24,8 @@ public class PlayerController : MonoBehaviour
     // Coyote time / jump buffer
     private float incomingJBufferActiveCooldown = 0f;
 
+    // Slowing down time. Used by redirector orb
+    private bool slowDownTime = false;
 
     // This controls where the visual player is looking. If it is false, the player will just look in the direction they are moving.
     // If it is true, the player will face the same direction of the camera, and their head will look direction where the camera is pointing.
@@ -50,6 +52,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform playerBodyVisuals;
     [SerializeField] private Transform playerHeadVisuals;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Material grappleMaterial;
 
     [SerializeField] private float visualsRotationSpeed = 10f; // How long it takes the player visuals to turn around (does NOT affect transform rotation)
 
@@ -81,10 +84,6 @@ public class PlayerController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         playerItemController = GetComponent<PlayerItemController>();
         grappleLine = gameObject.AddComponent<LineRenderer>();
-        Material grappleMaterial = new Material(
-            Shader.Find("Universal Render Pipeline/Unlit")
-        );
-        grappleMaterial.color = Color.black;
         grappleLine.material = grappleMaterial;
     }
 
@@ -174,9 +173,21 @@ public class PlayerController : MonoBehaviour
         usingGrapplingHook = false;
     }
 
+    public void StartRedirectionOrb() {
+        slowDownTime = true;
+    }
+
+    public void UseRedirectionOrb() {
+        slowDownTime = false;
+        playerVelocity = playerVelocity.magnitude * cameraPivot.forward;
+    }
+
     private void Update()
     {
-        Debug.Log(playerVelocity.magnitude);
+        float effectiveDeltaTime = Time.deltaTime;
+        if (slowDownTime) {
+            effectiveDeltaTime = Time.deltaTime / 5.0f;
+        }
 
         // -- Get inputs --
         // NOTE: These variables exist purely to determine which buttons were pressed
@@ -186,6 +197,19 @@ public class PlayerController : MonoBehaviour
         bool jumpInput = input.Player.Jump.WasPressedThisFrame();
         bool jumpReleasedInput = input.Player.Jump.WasReleasedThisFrame();
         // ----
+
+        // TODO: Eventually get a way to change sensitivity in a settings menu
+        // This just exists so there is a way to change sensitivity for builds
+        // Also note that this doesn't even persist across resets, the real solution
+        // Should be some config separate from the player, and the player should import the sensitivity
+        if (input.Player.SenseUp.WasPressedThisFrame()) {
+            lookSensitivity += 0.01f;
+            print(lookSensitivity);
+        }
+        if (input.Player.SenseDown.WasPressedThisFrame()) {
+            lookSensitivity -= 0.01f;
+            print(lookSensitivity);
+        }
 
         // -- Do movement --
         // Player controlled movement
@@ -257,12 +281,12 @@ public class PlayerController : MonoBehaviour
                 incomingJBufferActiveCooldown = incomingJumpBufferCooldown;
             }
 
-            playerVelocity.y -= gravityStrength * Time.deltaTime;
+            playerVelocity.y -= gravityStrength * effectiveDeltaTime;
             if (jumpAbortVelocity >= 0f) {
-                jumpAbortVelocity -= gravityStrength * Time.deltaTime;
+                jumpAbortVelocity -= gravityStrength * effectiveDeltaTime;
             }
 
-            float dragAmount = airDrag * Time.deltaTime;
+            float dragAmount = airDrag * effectiveDeltaTime;
             playerVelocity.x = Mathf.MoveTowards(playerVelocity.x, 0f, dragAmount);
             playerVelocity.z = Mathf.MoveTowards(playerVelocity.z, 0f, dragAmount);
         }
@@ -305,7 +329,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        CollisionFlags cflags = controller.Move(finalMovement * Time.deltaTime);
+        CollisionFlags cflags = controller.Move(finalMovement * effectiveDeltaTime);
 
         touchingWall = (cflags & CollisionFlags.Sides)!= 0;
 
@@ -340,12 +364,12 @@ public class PlayerController : MonoBehaviour
             playerBodyVisuals.rotation = Quaternion.Slerp(
                 playerBodyVisuals.rotation,
                 targetRotation,
-                visualsRotationSpeed * Time.deltaTime
+                visualsRotationSpeed * effectiveDeltaTime
             );
             playerHeadVisuals.rotation = Quaternion.Slerp(
                 playerHeadVisuals.rotation,
                 targetRotation,
-                visualsRotationSpeed * Time.deltaTime
+                visualsRotationSpeed * effectiveDeltaTime
             );
         }
 
@@ -361,11 +385,11 @@ public class PlayerController : MonoBehaviour
 
         // -- Reduce timers --
         if (bhopActiveCooldown >= 0f) {
-            bhopActiveCooldown -= Time.deltaTime;
+            bhopActiveCooldown -= effectiveDeltaTime;
         }
 
         if (incomingJBufferActiveCooldown >= 0f) {
-            incomingJBufferActiveCooldown -= Time.deltaTime;
+            incomingJBufferActiveCooldown -= effectiveDeltaTime;
         }
     }
 }

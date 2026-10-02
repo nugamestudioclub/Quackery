@@ -21,6 +21,7 @@ public class PlayerItemController : MonoBehaviour
     private float propellerHatDestroyCooldown = 0f;
 
     private bool grapplingHookInUse = false;
+    private bool redirectionOrbInUse = false;
 
     // -- CONFIGURATION --
     [SerializeField] private Transform cameraPivot;
@@ -161,6 +162,14 @@ public class PlayerItemController : MonoBehaviour
                     headItemVisuals
                 );
                 break;
+            case PrimaryItems.RedirectionOrb:
+                primaryItemVisualReference[slot] = Instantiate(
+                    prefabs.redirectionOrb,
+                    headItemVisuals.TransformPoint(new Vector3(1.1f, 0.5f, 0f)),
+                    headItemVisuals.rotation,
+                    headItemVisuals
+                );
+                break;
             case PrimaryItems.GrapplingHook:
                 primaryItemVisualReference[slot] = Instantiate(
                     prefabs.grapplingHook,
@@ -221,7 +230,13 @@ public class PlayerItemController : MonoBehaviour
             return;
         }
 
+        bool hotbarSwitched = false;
+        int oldSelectedPItem = 0;
         if (hotbar1Input) {
+            if (selectedPrimaryItem != 1) {
+                hotbarSwitched = true;
+                oldSelectedPItem = selectedPrimaryItem;
+            }
             selectedPrimaryItem = 1;
             if (primaryItemVisualReference[0] != null) {
                 primaryItemVisualReference[0].SetActive(true);
@@ -233,6 +248,10 @@ public class PlayerItemController : MonoBehaviour
                 primaryItemVisualReference[2].SetActive(false);
             }
         } else if (hotbar2Input) {
+            if (selectedPrimaryItem != 2) {
+                hotbarSwitched = true;
+                oldSelectedPItem = selectedPrimaryItem;
+            }
             selectedPrimaryItem = 2;
             if (primaryItemVisualReference[0] != null) {
                 primaryItemVisualReference[0].SetActive(false);
@@ -244,6 +263,10 @@ public class PlayerItemController : MonoBehaviour
                 primaryItemVisualReference[2].SetActive(false);
             }
         } else if (hotbar3Input) {
+            if (selectedPrimaryItem != 3) {
+                hotbarSwitched = true;
+                oldSelectedPItem = selectedPrimaryItem;
+            }
             selectedPrimaryItem = 3;
             if (primaryItemVisualReference[0] != null) {
                 primaryItemVisualReference[0].SetActive(false);
@@ -276,6 +299,13 @@ public class PlayerItemController : MonoBehaviour
                         headItemVisuals.rotation
                     );
                     break;
+                case PrimaryItems.RedirectionOrb:
+                    if (redirectionOrbInUse) {
+                        break;
+                    }
+                    redirectionOrbInUse = true;
+                    playerController.StartRedirectionOrb();
+                    break;
                 case PrimaryItems.GrapplingHook:
                     if (grapplingHookInUse) {
                         break;
@@ -285,7 +315,7 @@ public class PlayerItemController : MonoBehaviour
 
                     break;
             }
-            if (primaryItem[slot] != PrimaryItems.GrapplingHook) {
+            if (primaryItem[slot] != PrimaryItems.GrapplingHook && primaryItem[slot] != PrimaryItems.RedirectionOrb) {
                 primaryItem[slot] = PrimaryItems.None;
                 playerController.SetVisualsLocked(false);
 
@@ -296,20 +326,36 @@ public class PlayerItemController : MonoBehaviour
             }
         }
 
-        if (releasePrimaryInput) {
-            switch (primaryItem[slot]) {
+        if (releasePrimaryInput || hotbarSwitched) {
+            int effectiveSlot = slot;
+            if (hotbarSwitched) {
+                effectiveSlot = oldSelectedPItem - 1;
+            }
+            switch (primaryItem[effectiveSlot]) {
                 default:
                     break;
 
                 case PrimaryItems.GrapplingHook:
                     if (grapplingHookInUse) {
                         grapplingHookInUse = false;
-                        primaryItem[slot] = PrimaryItems.None;
+                        primaryItem[effectiveSlot] = PrimaryItems.None;
                         playerController.SetVisualsLocked(false);
                         playerController.StopGrappling();
-                        if (primaryItemVisualReference[slot] != null) {
-                            Object.Destroy(primaryItemVisualReference[slot]);
-                            primaryItemVisualReference[slot] = null;
+                        if (primaryItemVisualReference[effectiveSlot] != null) {
+                            Object.Destroy(primaryItemVisualReference[effectiveSlot]);
+                            primaryItemVisualReference[effectiveSlot] = null;
+                        }
+                    }
+                    break;
+                case PrimaryItems.RedirectionOrb:
+                    if (redirectionOrbInUse) {
+                        redirectionOrbInUse = false;
+                        primaryItem[effectiveSlot] = PrimaryItems.None;
+                        playerController.SetVisualsLocked(false);
+                        playerController.UseRedirectionOrb();
+                        if (primaryItemVisualReference[effectiveSlot] != null) {
+                            Object.Destroy(primaryItemVisualReference[effectiveSlot]);
+                            primaryItemVisualReference[effectiveSlot] = null;
                         }
                     }
                     break;
