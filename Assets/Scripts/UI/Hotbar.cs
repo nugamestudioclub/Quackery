@@ -19,6 +19,9 @@ public class Hotbar : MonoBehaviour
     void Start()
     {
         playerItems = FindFirstObjectByType<PlayerItemController>();
+        if (playerItems == null) {
+            throw new System.Exception("Hotbar couldn't find the player. Please make sure there is a Player in your scene (Prefabs/Core/Player)");
+        }
 
         foreach (Transform slot in primarySlotsSel) {
             slot.gameObject.SetActive(false);

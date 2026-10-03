@@ -3,13 +3,23 @@ using UnityEngine;
 public class Redirector : MonoBehaviour
 {
     private float VELO_LAUNCH_CUTOFF = 3f;
+    private Transform playerTransform;
 
     // NOTE: This should probably be 0 if the redirector is pointing up
     // (unless you want the player to be able to get infinite height...)
     [SerializeField] private float ADDED_VELO = 4f;
 
     [SerializeField] private Transform ringTransform;
-    [SerializeField] private Transform playerTransform; // TODO: Find a better way to get the player
+
+    private void Start()
+    {
+        PlayerController player = FindFirstObjectByType<PlayerController>();
+        if (player == null) {
+            throw new System.Exception("Redirector couldn't find the player. Please make sure there is a Player in your scene (Prefabs/Core/Player)");
+        }
+
+        playerTransform = player.transform;
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -26,7 +36,8 @@ public class Redirector : MonoBehaviour
             player.SetVelocity(newVelo.x, newVelo.y, newVelo.z);
         }
     }
-    void Update()
+
+    private void Update()
     {
         Vector3 direction = playerTransform.position - ringTransform.position;
 
