@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
     private PlayerInput input;
     private CharacterController controller;
     private PlayerItemController playerItemController;
+    private GameManager gameManager;
 
     // Velocity from gravity and other sources, NOT from player controls
     private Vector3 playerVelocity;
@@ -89,9 +90,10 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
+        gameManager = FindFirstObjectByType<GameManager>();
+        if (gameManager == null) {
+            throw new System.Exception("Player couldn't find GameManager. Add one to your scene (Prefabs/Core/GameManager)");
+        }
 
         grappleLine.startWidth = 0.05f;
         grappleLine.endWidth = 0.05f;
@@ -184,6 +186,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        // If the game is paused the player shouldn't be doing anything
+        if (gameManager.isPaused()) {
+            return;
+        }
+
         float effectiveDeltaTime = Time.deltaTime;
         if (slowDownTime) {
             effectiveDeltaTime = Time.deltaTime / 5.0f;
