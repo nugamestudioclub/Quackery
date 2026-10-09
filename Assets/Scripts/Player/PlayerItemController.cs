@@ -7,6 +7,7 @@ public class PlayerItemController : MonoBehaviour
 {
     private PlayerInput input;
     private PlayerController playerController;
+    private GameManager gameManager;
 
     private PrimaryItems[] primaryItem = {PrimaryItems.None, PrimaryItems.None, PrimaryItems.None};
     private int selectedPrimaryItem = 1;
@@ -39,6 +40,14 @@ public class PlayerItemController : MonoBehaviour
     {
         playerController = GetComponent<PlayerController>();
         input = new PlayerInput();
+    }
+
+    private void Start()
+    {
+        gameManager = FindFirstObjectByType<GameManager>();
+        if (gameManager == null) {
+            throw new System.Exception("Player couldn't find GameManager. Add one to your scene (Prefabs/Core/GameManager)");
+        }
     }
 
     private void OnEnable()
@@ -218,6 +227,12 @@ public class PlayerItemController : MonoBehaviour
     // -- Main update loop --
     private void Update()
     {
+        // If the game is paused the player shouldn't be doing anything
+        if (gameManager.isPaused()) {
+            return;
+        }
+
+
         bool usePrimaryInput = input.Player.UsePrimary.WasPressedThisFrame();
         bool releasePrimaryInput = input.Player.UsePrimary.WasReleasedThisFrame();
         bool hotbar1Input = input.Player.Hotbar1.WasPressedThisFrame();
