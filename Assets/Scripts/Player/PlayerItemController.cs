@@ -24,6 +24,9 @@ public class PlayerItemController : MonoBehaviour
     private bool grapplingHookInUse = false;
     private bool redirectionOrbInUse = false;
 
+    private TASDriver tasDriver;
+    private bool useTAS;
+
     // -- CONFIGURATION --
     [SerializeField] private Transform cameraPivot;
     [SerializeField] private Transform bodyItemVisuals;
@@ -47,6 +50,11 @@ public class PlayerItemController : MonoBehaviour
         gameManager = FindFirstObjectByType<GameManager>();
         if (gameManager == null) {
             throw new System.Exception("Player couldn't find GameManager. Add one to your scene (Prefabs/Core/GameManager)");
+        }
+
+        tasDriver = FindFirstObjectByType<TASDriver>();
+        if (tasDriver != null) {
+            useTAS = true;
         }
     }
 
@@ -232,13 +240,29 @@ public class PlayerItemController : MonoBehaviour
             return;
         }
 
+        bool usePrimaryInput;
+        bool releasePrimaryInput;
+        bool hotbar1Input;
+        bool hotbar2Input;
+        bool hotbar3Input;
+        bool restartLevelInput;
+        if (useTAS) {
+            usePrimaryInput = tasDriver.GetUsePrimaryInput();
+            releasePrimaryInput = tasDriver.GetReleasePrimaryInput();
+            hotbar1Input = tasDriver.GetHb1Input();
+            hotbar2Input = tasDriver.GetHb2Input();
+            hotbar3Input = tasDriver.GetHb3Input();
+            restartLevelInput = tasDriver.GetRestartInput() || input.Player.Restart.WasPressedThisFrame();
+        }
+        else {
+            usePrimaryInput = input.Player.UsePrimary.WasPressedThisFrame();
+            releasePrimaryInput = input.Player.UsePrimary.WasReleasedThisFrame();
+            hotbar1Input = input.Player.Hotbar1.WasPressedThisFrame();
+            hotbar2Input = input.Player.Hotbar2.WasPressedThisFrame();
+            hotbar3Input = input.Player.Hotbar3.WasPressedThisFrame();
+            restartLevelInput = input.Player.Restart.WasPressedThisFrame();
+        }
 
-        bool usePrimaryInput = input.Player.UsePrimary.WasPressedThisFrame();
-        bool releasePrimaryInput = input.Player.UsePrimary.WasReleasedThisFrame();
-        bool hotbar1Input = input.Player.Hotbar1.WasPressedThisFrame();
-        bool hotbar2Input = input.Player.Hotbar2.WasPressedThisFrame();
-        bool hotbar3Input = input.Player.Hotbar3.WasPressedThisFrame();
-        bool restartLevelInput = input.Player.Restart.WasPressedThisFrame();
 
         if (restartLevelInput) {
             RestartLevel();

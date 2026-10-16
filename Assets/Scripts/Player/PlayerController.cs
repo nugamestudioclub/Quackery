@@ -44,6 +44,9 @@ public class PlayerController : MonoBehaviour
     private float grappleDistance;
     private LineRenderer grappleLine;
 
+    private TASDriver tasDriver;
+    private bool useTAS;
+
     // -- PLAYER CONFIGURATION --
     // These variables are essentially "magic number" constants which define player physics/input/etc. defaults.
     // Despite being SerializeFields, they probably should not be adjusted per level; they are set to SerializeField primarily
@@ -93,6 +96,11 @@ public class PlayerController : MonoBehaviour
         gameManager = FindFirstObjectByType<GameManager>();
         if (gameManager == null) {
             throw new System.Exception("Player couldn't find GameManager. Add one to your scene (Prefabs/Core/GameManager)");
+        }
+
+        tasDriver = FindFirstObjectByType<TASDriver>();
+        if (tasDriver != null) {
+            useTAS = true;
         }
 
         grappleLine.startWidth = 0.05f;
@@ -199,10 +207,22 @@ public class PlayerController : MonoBehaviour
         // -- Get inputs --
         // NOTE: These variables exist purely to determine which buttons were pressed
         // Their values should never be changed later in the script for any reason
-        Vector2 moveInput = input.Player.Walk.ReadValue<Vector2>();
-        Vector2 lookInput = input.Player.Look.ReadValue<Vector2>();
-        bool jumpInput = input.Player.Jump.WasPressedThisFrame();
-        bool jumpReleasedInput = input.Player.Jump.WasReleasedThisFrame();
+        Vector2 moveInput;
+        Vector2 lookInput;
+        bool jumpInput;
+        bool jumpReleasedInput;
+        if (useTAS) {
+            moveInput = tasDriver.GetMoveInput();
+            lookInput = tasDriver.GetLookInput();
+            jumpInput = tasDriver.GetJumpInput();
+            jumpReleasedInput = tasDriver.GetJumpReleasedInput();
+        }
+        else {
+            moveInput = input.Player.Walk.ReadValue<Vector2>();
+            lookInput = input.Player.Look.ReadValue<Vector2>();
+            jumpInput = input.Player.Jump.WasPressedThisFrame();
+            jumpReleasedInput = input.Player.Jump.WasReleasedThisFrame();
+        }
         // ----
 
         // TODO: Eventually get a way to change sensitivity in a settings menu
