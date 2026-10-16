@@ -16,7 +16,7 @@ public class Hotbar : MonoBehaviour
     int lastActiveHotbarSlot = -1;
     bool hadJumpItem = false;
 
-    void Start()
+    private void Start()
     {
         playerItems = FindFirstObjectByType<PlayerItemController>();
         if (playerItems == null) {
@@ -33,7 +33,7 @@ public class Hotbar : MonoBehaviour
         jumpSlotItemImage.gameObject.SetActive(false);
     }
 
-    void Update()
+    private void Update()
     {
         if (
             playerItems == null ||
